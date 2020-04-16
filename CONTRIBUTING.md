@@ -74,3 +74,108 @@ It’s important that every piece of code in Apollo packages is reviewed by at l
 4. **No unnecessary or unrelated changes.** PRs shouldn’t come with random formatting changes, especially in unrelated parts of the code. If there is some refactoring that needs to be done, it should be in a separate PR from a bug fix or feature, if possible.
 5. **Code has appropriate comments.** Code should be commented, or written in a clear “self-documenting” way.
 6. **Idiomatic use of the language.** In TypeScript, make sure the typings are specific and correct. In ES2015, make sure to use imports rather than require and const instead of var, etc. Ideally a linter enforces a lot of this, but use your common sense and follow the style of the surrounding code.
+
+## Development
+
+### Building
+
+**Build Apollo Client once:**
+
+```
+npm run build
+```
+
+**Build and watch for file changes:**
+
+```
+npm run watch
+```
+
+### Testing
+
+**Run all tests once:**
+
+```
+npm run test
+```
+
+**Run all tests in watch mode:**
+
+```
+npm run test:watch
+```
+
+**Run specific tests:**
+
+Call jest directly making sure to pass in the jest config, and use its `testRegex` option:
+
+```
+jest --config ./config/jest.config.js --testRegex __tests__/useQuery.test.tsx
+```
+
+### Wiring a checkout into an application
+
+It can be useful to link an Apollo Client checkout into an application, to test how Apollo Client development changes impact a real app. We'll use the [Apollo fullstack tutorial application](https://github.com/apollographql/fullstack-tutorial) to demonstrate this.
+
+> **Note:** The fullstack tutorial updates for Apollo Client 3 haven't been merged into `master` yet, so for now we'll use the tutorial's `apollo-client-3` branch.
+
+1) Clone and install the fullstack tutorial.
+
+```
+git clone https://github.com/apollographql/fullstack-tutorial.git
+cd fullstack-tutorial
+git checkout apollo-client-3
+cd final/server
+npm i
+cd ../client
+npm i
+```
+
+2) Link the application's `@apollo/client` package to your Apollo Client checkout's compiled files.
+
+```
+cd /some/path/fullstack-tutorial/final/client/node_modules/@apollo
+rm -Rf ./client
+ln -s /some/path/apollo-client/dist client
+```
+
+3) If using React, prevent a duplicate React version lookup error by telling your application to use Apollo Client's React version.
+
+```
+cd /some/path/fullstack/final/client/node_modules
+rm -Rf ./react ./react-dom
+ln -s /some/path/apollo-client/node_modules/react
+ln -s /some/path/apollo-client/node_modules/react-dom
+```
+
+4) Start the fullstack tutorial.
+
+Server:
+
+```
+cd /some/path/fullstack-tutorial/final/server
+npm start
+```
+
+Client:
+
+```
+cd /some/path/fullstack-tutorial/final/client
+npm start
+```
+
+5) Start building Apollo Client and watching for file changes.
+
+```
+cd /some/path/apollo-client
+npm run watch
+```
+
+6) Verify Apollo Client changes show up in the fullstack tutorial.
+
+```
+cd /some/path/apollo-client/src
+echo "console.log('it worked');" >> index.ts
+```
+
+Visit http://localhost:3000/ and open your browsers dev console. After the Apollo Client rebuild finishes, you should see `it worked` in the console.
